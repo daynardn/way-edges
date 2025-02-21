@@ -202,8 +202,8 @@ impl DrawData {
             ((self.bg_size.1 - normal_text_surf.height() as f64) / 2.).floor(),
         );
 
-        let bg_text_surf = {
-            let (bg_text_surf, ctx) = self.new_surface_bar();
+        let fg_text_surf = {
+            let (fg_text_surf, ctx) = self.new_surface_bar();
             ctx.mask_surface(normal_text_surf, text_start_pos.0, text_start_pos.1)
                 .unwrap();
 
@@ -219,13 +219,13 @@ impl DrawData {
 
             let (final_surf, ctx) = self.new_surface_bar();
             ctx.set_source_surface(mask_surf, Z, Z).unwrap();
-            ctx.mask_surface(&bg_text_surf, Z, Z).unwrap();
+            ctx.mask_surface(&fg_text_surf, Z, Z).unwrap();
 
             final_surf
         };
 
-        let fg_text_surf = {
-            let (fg_text_surf, ctx) = self.new_surface_bar();
+        let bg_text_surf = {
+            let (bg_text_surf, ctx) = self.new_surface_bar();
 
             if let Some(bg_text_color) = conf.bg_text_color {
                 cairo_set_color(&ctx, bg_text_color);
@@ -241,16 +241,16 @@ impl DrawData {
             // ctx.set_operator(cairo::Operator::Clear);
             // ctx.fill().unwrap();
 
-            fg_text_surf
+            bg_text_surf
         };
 
-        (bg_text_surf, fg_text_surf)
+        (fg_text_surf, bg_text_surf)
     }
     fn draw_text_on_ctx(&self, ctx: &cairo::Context, conf: &DrawConfig) {
-        let (bg_text, fg_text) = self.make_text(conf);
-        ctx.set_source_surface(&fg_text, Z, Z).unwrap();
-        ctx.paint().unwrap();
+        let (fg_text, bg_text) = self.make_text(conf);
         ctx.set_source_surface(&bg_text, Z, Z).unwrap();
+        ctx.paint().unwrap();
+        ctx.set_source_surface(&fg_text, Z, Z).unwrap();
         ctx.paint().unwrap();
     }
 }
